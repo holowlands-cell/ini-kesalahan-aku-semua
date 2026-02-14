@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secret++ Valentine Dreamy</title>
+<style>
+body{margin:0;background:#000;font-family:system-ui,-apple-system,sans-serif;overflow:hidden;color:#fff;}
+#box{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  padding:22px 26px;border-radius:18px;backdrop-filter:blur(14px);
+  background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.15);
+  text-align:center;z-index:5;min-width:300px;
+}
+input{
+  background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.4);
+  color:#fff;font-size:16px;outline:none;text-align:center;padding:8px;width:220px;
+}
+.shake{animation:shake .25s 2;}
+@keyframes shake{0%{transform:translate(-50%,-50%) translateX(0)}25%{transform:translate(-50%,-50%) translateX(-6px)}50%{transform:translate(-50%,-50%) translateX(6px)}75%{transform:translate(-50%,-50%) translateX(-6px)}100%{transform:translate(-50%,-50%) translateX(0)}}
+canvas{position:fixed;top:0;left:0;pointer-events:none;z-index:100;}
+#glowSlide{
+  position:fixed;top:20px;left:50%;transform:translateX(-50%);
+  font-size:42px;color:#ff4da6;
+  text-shadow:0 0 18px #ff4da6,0 0 40px #ff4da6;
+  opacity:0;transition:.4s;pointer-events:none;z-index:6;
+}
+#errorMsg{color:#ff4da6;margin-top:10px;font-size:14px;opacity:0;transition:.4s;}
+#closing{
+  position:fixed;bottom:50px;left:50%;transform:translateX(-50%);
+  padding:20px 30px;border-radius:15px;background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(12px);border:1px solid rgba(255,77,166,0.2);
+  color:#ff4da6;font-size:24px;text-align:center;opacity:0;transition:.6s;z-index:7;
+  text-shadow:0 0 8px #ff4da6,0 0 16px #ff4da6,0 0 24px #ff4da6;
+  animation: glowPulse 1.8s infinite alternate;
+}
+@keyframes glowPulse {
+  0% { text-shadow:0 0 8px #ff4da6,0 0 16px #ff4da6,0 0 24px #ff4da6; }
+  50% { text-shadow:0 0 16px #ff4da6,0 0 32px #ff4da6,0 0 48px #ff4da6; }
+  100% { text-shadow:0 0 8px #ff4da6,0 0 16px #ff4da6,0 0 24px #ff4da6; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<canvas id="fw"></canvas>
+<canvas id="loveLine"></canvas>
+
+<div id="box">
+<div>🔒 Enter Secret Code</div>
+<input id="codeInput" placeholder="type code...">
+<div id="errorMsg">Incorrect password!</div>
+</div>
+
+<div id="glowSlide">I LOVE YOU</div>
+<div id="closing">💌 Happy Valentine! 💕</div>
+
+<audio id="music" src="love.mp3" loop></audio>
+
+<script>
+/* ===== PASSWORD ===== */
+const PASSWORD="sumala side";
+
+/* ===== PARAGRAPH TEXT LEBIH PANJANG ===== */
+const texts=[
+"to my love, from the first moment you entered my life, the world became softer, and my heart found its rhythm in your presence.",
+"your laughter, your gentle words, your subtle ways of showing care—every part of you feels like poetry to my soul.",
+"every day with you is a story worth telling; every glance, every touch, every sigh carries a universe of emotions.",
+"even in quiet silences, your presence resonates louder than any song, filling spaces with warmth, love, and comfort.",
+"in this vast, endless universe, it is you who colors my world, shapes my dreams, and makes ordinary moments extraordinary."
+];
+const secretText="and if someday words fail me, remember this — you are loved beyond measure, more than words, more than stars.";
+
+/* ===== LOCK SCREEN ===== */
+const box=document.getElementById("box");
+const errorMsg=document.getElementById("errorMsg");
+document.getElementById("codeInput").addEventListener("keydown",e=>{if(e.key==="Enter") unlock();});
+function unlock(){
+    let val=document.getElementById("codeInput").value.toLowerCase();
+    if(val!==PASSWORD){
+        box.classList.add("shake");
+        navigator.vibrate(200);
+        errorMsg.style.opacity=1;
+        setTimeout(()=>{box.classList.remove("shake"); errorMsg.style.opacity=0;},800);
+        return;
+    }
+    box.innerHTML='<div id="text">tap me</div>';
+    box.onclick=next;
+}
+
+/* ===== TAP SYSTEM ===== */
+let step=0;
+let musicStarted=false;
+const closing=document.getElementById("closing");
+function next(){
+    if(!musicStarted){document.getElementById("music").play().catch(()=>{}); musicStarted=true;}
+    let text=document.getElementById("text");
+    if(step<texts.length){
+        text.innerText=texts[step]; step++;
+        if(step===texts.length) fireworkLoop();
+    } else if(step===texts.length){
+        text.innerText=secretText; drawFullHeart(); step++;
+        setTimeout(()=>{closing.style.opacity=1;},2500);
+    }
+}
+
+/* ===== BACKGROUND BINTANG BERGERAK DREAMY ===== */
+const starCanvas=document.getElementById("stars");
+const sctx=starCanvas.getContext("2d");
+starCanvas.width=innerWidth; starCanvas.height=innerHeight;
+let stars=[];
+for(let i=0;i<200;i++){ 
+    stars.push({
+        x: Math.random()*innerWidth,
+        y: Math.random()*innerHeight,
+        size: Math.random()*1.5+0.3,
+        vx: (Math.random()-0.5)*0.2,
+        vy: (Math.random()-0.5)*0.2
+    });
+}
+function drawStars(){
+    sctx.clearRect(0,0,starCanvas.width,starCanvas.height);
+    stars.forEach(star=>{
+        star.x += star.vx;
+        star.y += star.vy;
+        if(star.x<0) star.x=innerWidth;
+        if(star.x>innerWidth) star.x=0;
+        if(star.y<0) star.y=innerHeight;
+        if(star.y>innerHeight) star.y=0;
+        sctx.beginPath();
+        sctx.arc(star.x, star.y, star.size, 0, Math.PI*2);
+        sctx.fillStyle = "rgba(255,255,255,0.08)";
+        sctx.fill();
+    });
+    requestAnimationFrame(drawStars);
+}
+drawStars();
+
+/* ===== FIREWORKS LOOPING ===== */
+const fwCanvas=document.getElementById("fw");
+const fctx=fwCanvas.getContext("2d");
+fwCanvas.width=innerWidth; fwCanvas.height=innerHeight;
+let particles=[];
+function fireworkLoop(){
+    setInterval(()=>{
+        for(let i=0;i<200;i++){
+            particles.push({x:fwCanvas.width/2,y:fwCanvas.height/2,vx:(Math.random()-0.5)*5,vy:(Math.random()-0.5)*5,life:150});
+        }
+    },2000);
+}
+function drawFW(){
+    fctx.clearRect(0,0,fwCanvas.width,fwCanvas.height);
+    particles.forEach((p,i)=>{
+        p.x+=p.vx; p.y+=p.vy; p.life--;
+        fctx.fillStyle="rgba(255,77,166,"+p.life/150+")";
+        fctx.fillRect(p.x,p.y,2,2);
+        if(p.life<=0) particles.splice(i,1);
+    });
+    requestAnimationFrame(drawFW);
+}
+drawFW();
+
+/* ===== LOVE HEART PENUH ===== */
+const loveCanvas=document.getElementById("loveLine");
+const lctx=loveCanvas.getContext("2d");
+loveCanvas.width=innerWidth; loveCanvas.height=innerHeight;
+let t=0;
+function drawFullHeart(){
+    function draw(){
+        lctx.clearRect(0,0,loveCanvas.width,loveCanvas.height);
+        for(let i=0;i<t;i+=0.02){
+            let r=Math.random()*3+1;
+            let angle=i;
+            let x=16*Math.pow(Math.sin(angle),3);
+            let y=13*Math.cos(angle)-5*Math.cos(2*angle)-2*Math.cos(3*angle)-Math.cos(4*angle);
+            lctx.beginPath();
+            lctx.fillStyle="rgba(255,77,166,0.35)";
+            lctx.arc(loveCanvas.width/2 + x*20, loveCanvas.height/2 - y*20, r, 0, Math.PI*2);
+            lctx.fill();
+        }
+        t+=0.02;
+        if(t<6.3) requestAnimationFrame(draw);
+    }
+    draw();
+}
+
+/* DOUBLE TAP DI ATAS */
+let lastTap=0;
+const glow=document.getElementById("glowSlide");
+document.addEventListener("touchend",e=>{
+    if(e.clientY<100){
+        let now=Date.now();
+        if(now-lastTap<300){
+            glow.style.opacity=1;
+            setTimeout(()=>glow.style.opacity=0,1500);
+        }
+        lastTap=now;
+    }
+});
+
+/* HOLD → HEART BURST */
+let holdTimer;
+document.addEventListener("touchstart",()=>{holdTimer=setTimeout(heartBurst,700);});
+document.addEventListener("touchend",()=>clearTimeout(holdTimer));
+function heartBurst(){
+    for(let i=0;i<120;i++){
+        particles.push({x:fwCanvas.width/2,y:fwCanvas.height/2,vx:(Math.random()-0.5)*5,vy:(Math.random()-0.5)*5,life:80});
+    }
+}
+</script>
+</body>
+</html>
